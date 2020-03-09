@@ -19,5 +19,7 @@ public interface IUserService {
 	List<User> findAllPaginated(int pageNumber, int pageSize, String sortBy);
 	
 	User saveNewUser(User user);
+	
+	void deleteById(Long id);
 
 }

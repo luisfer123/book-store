@@ -1,6 +1,7 @@
 package com.book.store.services;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.book.store.exceptions.PageNumberNotValidException;
+import com.book.store.exceptions.ResourceNotFoundException;
 import com.book.store.model.entities.User;
 import com.book.store.repositories.UserRepository;
 import com.book.store.services.interfaces.IUserService;
@@ -36,7 +38,7 @@ public class UserService implements IUserService {
 				throw new PageNumberNotValidException();
 			
 			if(userRepo.findAll().isEmpty())
-				throw new RuntimeException();
+				throw new ResourceNotFoundException();
 			
 			throw new RuntimeException();
 		}
@@ -48,6 +50,17 @@ public class UserService implements IUserService {
 	@Transactional
 	public User saveNewUser(User newUser) {
 		return userRepo.save(newUser);
+	}
+	
+	@Override
+	@Transactional
+	public void deleteById(Long id) {
+		Optional<User> oUser = userRepo.findById(id);
+		
+		if(!oUser.isPresent())
+			throw new RuntimeException();
+		
+		userRepo.delete(oUser.get());
 	}
 
 }
