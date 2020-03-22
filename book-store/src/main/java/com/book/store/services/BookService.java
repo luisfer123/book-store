@@ -46,5 +46,10 @@ public class BookService {
 		
 		return findAllPaginated(pageNumber, pageSize, sortBy).getContent();
 	}
+	
+	@Transactional
+	public Book createBook(Book book) {
+		return bookRepo.save(book);
+	}
 
 }

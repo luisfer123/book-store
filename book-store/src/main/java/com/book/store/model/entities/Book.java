@@ -9,11 +9,13 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.Table;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.GenericGenerator;
 
 @Entity
-@Table(name = "book")
+@Table(name = "books")
 public class Book {
 	
 	@Id
@@ -21,12 +23,15 @@ public class Book {
 	@GenericGenerator(name = "native", strategy = "native")
 	private Long id;
 	
+	@NotBlank
 	@Column(name = "name")
 	private String name;
 	
+	@NotBlank
 	@Column(name = "author")
 	private String author;
 	
+	@NotNull
 	@Column(name = "price")
 	private BigDecimal price;
 	

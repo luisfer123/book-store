@@ -48,7 +48,7 @@ public class UserResource {
 		
 		URI location = ServletUriComponentsBuilder
 				.fromCurrentRequest()
-				.path("{id}")
+			.path("{id}")
 				.buildAndExpand(newUser.getId())
 				.toUri();
 		

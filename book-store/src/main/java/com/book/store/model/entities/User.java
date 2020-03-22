@@ -1,13 +1,21 @@
 package com.book.store.model.entities;
 
+import java.util.Set;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.GenericGenerator;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "users")
@@ -21,6 +29,7 @@ public class User {
 	@Column(name = "username")
 	private String username;
 	
+	@JsonIgnore
 	@Column(name = "password")
 	private String password;
 	
@@ -29,6 +38,21 @@ public class User {
 	
 	@Column(name = "type")
 	private String type;
+	
+	@JsonIgnore
+	@ManyToMany(fetch = FetchType.EAGER)
+	@JoinTable(name = "users_has_authorities",
+			joinColumns = @JoinColumn(name = "users_id"),
+			inverseJoinColumns = @JoinColumn(name = "authorities_id"))
+	private Set<Authority> authorities;
+	
+	public User() { }
+	
+	public User(String username, String email, String password) {
+		this.username = username;
+		this.email = email;
+		this.password = password;
+	}
 
 	public Long getId() {
 		return id;
@@ -70,23 +94,39 @@ public class User {
 		this.type = type;
 	}
 	
+	public Set<Authority> getAuthorities() {
+		return authorities;
+	}
+
+	public void setAuthorities(Set<Authority> authorities) {
+		this.authorities = authorities;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		
 		if(o == this)
 			return true;
 		
-		if(getClass() != o.getClass())
+		if(!(o instanceof User))
 			return false;
 		
 		User other = (User) o;
 		return id != null && 
-				id.equals(other.id);
+				id.equals(other.getId());
 	}
 	
 	@Override
 	public int hashCode() {
 		return 33; 
 	}
+
+	@Override
+	public String toString() {
+		return "User [id=" + id + ", username=" + username 
+				+ ", password=" + password + ", email=" + email + "]";
+	}
+	
+	
 
 }
