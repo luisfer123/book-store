@@ -14,6 +14,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.book.store.model.entities.Authority;
 import com.book.store.model.entities.User;
 import com.book.store.model.enums.ERole;
+import com.book.store.model.payloads.UserRegistrationPayload;
 import com.book.store.repositories.AuthorityRepository;
 import com.book.store.repositories.UserRepository;
 import com.book.store.security.UserDetailsImpl;
@@ -30,7 +32,7 @@ import com.book.store.security.jwt.JwtUtils;
 import com.book.store.security.jwt.payload.JwtResponse;
 import com.book.store.security.jwt.payload.LoginRequest;
 import com.book.store.security.jwt.payload.MessageResponse;
-import com.book.store.security.jwt.payload.SignupRequest;
+import com.book.store.services.UserService;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:4200")
@@ -47,7 +49,13 @@ public class JwtAuthController {
 	private UserRepository userRepo;
 	
 	@Autowired
+	private UserService userService;
+	
+	@Autowired
 	private AuthorityRepository authorityRepo;
+	
+	@Autowired
+	private PasswordEncoder encoder;
 	
 	@PostMapping(value = "/login")
 	public ResponseEntity<Object> authenticateUser(
@@ -85,27 +93,24 @@ public class JwtAuthController {
 	
 	@PostMapping(value = "/signup")
 	public ResponseEntity<Object> registerUser(
-			@Valid @RequestBody SignupRequest signupRequest) {
+			@RequestBody @Valid UserRegistrationPayload userRegistrationPayload) {
 		
-		if(userRepo.existsByEmail(signupRequest.getUsername())) {
+		if(userRepo.existsByEmail(userRegistrationPayload.getUsername())) {
 			return ResponseEntity
 					.badRequest()
 					.body(new MessageResponse("Error: Username already in use!"));
 		}
 		
-		if(userRepo.existsByEmail(signupRequest.getEmail())) {
+		if(userRepo.existsByEmail(userRegistrationPayload.getEmail())) {
 			return ResponseEntity
 					.badRequest()
 					.body(new MessageResponse("Error: Email already associated with an account!"));
 		}
 		
-		User newUser = new User(
-				signupRequest.getUsername(),
-				signupRequest.getEmail(),
-				signupRequest.getPassword()
-			);
+		User newUser = userRegistrationPayload.getUserWhithoutAuthorities();
+		newUser.setPassword(encoder.encode(newUser.getPassword()));
 		
-		Set<String> strAuthorities = signupRequest.getRoles();
+		Set<String> strAuthorities = userRegistrationPayload.getAuthorities();
 		Set<Authority> authorities = new HashSet<>();
 		
 		if(strAuthorities == null) {
@@ -138,7 +143,7 @@ public class JwtAuthController {
 		}
 		
 		newUser.setAuthorities(authorities);
-		userRepo.save(newUser);
+		userService.saveNewUser(newUser);
 		
 		return ResponseEntity.ok(null);
 	}

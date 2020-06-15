@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.book.store.exceptions.PageNumberNotValidException;
 import com.book.store.exceptions.ResourceNotFoundException;
+import com.book.store.exceptions.UserNotFoundException;
 import com.book.store.model.entities.User;
 import com.book.store.repositories.UserRepository;
 import com.book.store.services.interfaces.IUserService;
@@ -45,9 +46,40 @@ public class UserService implements IUserService {
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
+	public User findById(Long id) throws UserNotFoundException {
+		Optional<User> oUser = userRepo.findById(id);
+		
+		return oUser.orElseThrow(
+				() -> new UserNotFoundException(
+						"User with id: " + id + " was not found!")
+			);
+	}
+	
+	@Override
 	@Transactional
 	public User saveNewUser(User newUser) {
 		return userRepo.save(newUser);
+	}
+	
+	@Override
+	@Transactional
+	public User updateUserData(User user) {
+		
+		User userUpdated = userRepo.findById(user.getId())
+				.orElseThrow(() -> 
+					new UserNotFoundException("User with id " + user.getId() + " was not found1"));
+		
+		userUpdated.setUsername(user.getUsername());
+		userUpdated.setEmail(user.getEmail());
+		
+		return userRepo.save(userUpdated);
+	}
+	
+	@Override
+	@Transactional
+	public void updatePassword(String newPassword) {
+		
 	}
 	
 	@Override

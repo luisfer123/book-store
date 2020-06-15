@@ -21,5 +21,11 @@ public interface IUserService {
 	User saveNewUser(User user);
 	
 	void deleteById(Long id);
+	
+	User findById(Long id);
+	
+	void updatePassword(String newPassword);
+
+	User updateUserData(User user);
 
 }

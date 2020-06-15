@@ -1,23 +1,30 @@
 package com.book.store.rest.controllers;
 
-import java.net.URI;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.book.store.exceptions.UserNotFoundException;
 import com.book.store.model.entities.User;
+import com.book.store.model.payloads.ConfirmPasswordCommand;
 import com.book.store.services.interfaces.IUserService;
 
 @RestController
@@ -41,20 +48,21 @@ public class UserResource {
 				usersPage, HttpStatus.OK);
 	}
 	
-	@PostMapping(path = "")
-	public ResponseEntity<String> createUser(@RequestBody User newUser) {
+	@GetMapping(path = "/{id}")
+	public EntityModel<User> getUser(@PathVariable("id") Long id) throws UserNotFoundException {
 		
-		newUser = userService.saveNewUser(newUser);
+		User user = userService.findById(id);
 		
-		URI location = ServletUriComponentsBuilder
-				.fromCurrentRequest()
-			.path("{id}")
-				.buildAndExpand(newUser.getId())
-				.toUri();
+		Link linkAllUsers = linkTo(methodOn(this.getClass())
+				.getUsers(0, 9, "id"))
+				.withRel("All-Users");
 		
-		return ResponseEntity
-				.created(location)
-				.build();
+		Link selfLink = linkTo(methodOn(this.getClass())
+				.getUser(user.getId()))
+				.withSelfRel();
+		
+		
+		return new EntityModel<User>(user, linkAllUsers, selfLink);
 	}
 	
 	@DeleteMapping(path = "/{id}")
@@ -64,4 +72,28 @@ public class UserResource {
 		
 	}
 	
+	
+	@PutMapping(path = "/{id}")
+	public ResponseEntity<?> updateUserGeneralInfo(
+			@PathVariable("id") Long id,
+			@RequestBody User user) {
+		
+		userService.updateUserData(user);
+		
+		return ResponseEntity
+				.noContent()
+				.build();
+	}
+	
+	@PutMapping(path = "/{id}/updatePassword")
+	public ResponseEntity<?> updatePassword(
+			@RequestBody @Valid ConfirmPasswordCommand confirmPassword) {
+		
+		System.out.println("password updated!");
+		
+		return ResponseEntity
+				.noContent()
+				.build();
+		
+	}
 }
