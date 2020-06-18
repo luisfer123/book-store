@@ -4,6 +4,9 @@ import java.util.Set;
 
 import javax.persistence.Persistence;
 import javax.validation.GroupSequence;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import javax.xml.crypto.Data;
 
 import org.hibernate.type.Type;
@@ -39,12 +42,19 @@ public class UserRegistrationPayload {
 	
 private Long id;
 	
+	@NotBlank
 	private String username;
 	
+	@NotBlank
+	@Size(min = 6, max = 15)
 	private String password;
 	
+	@NotBlank
+	@Size(min = 6, max = 15)
 	private String confirmPassword;
 	
+	@NotBlank
+	@Email
 	private String email;
 	
 	private String type;

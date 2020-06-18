@@ -49,7 +49,8 @@ public class UserResource {
 	}
 	
 	@GetMapping(path = "/{id}")
-	public EntityModel<User> getUser(@PathVariable("id") Long id) throws UserNotFoundException {
+	public EntityModel<User> getUser(@PathVariable("id") Long id) 
+			throws UserNotFoundException {
 		
 		User user = userService.findById(id);
 		

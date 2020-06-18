@@ -95,6 +95,8 @@ public class JwtAuthController {
 	public ResponseEntity<Object> registerUser(
 			@RequestBody @Valid UserRegistrationPayload userRegistrationPayload) {
 		
+		System.out.println("Signup executed!");
+		
 		if(userRepo.existsByEmail(userRegistrationPayload.getUsername())) {
 			return ResponseEntity
 					.badRequest()
@@ -145,7 +147,9 @@ public class JwtAuthController {
 		newUser.setAuthorities(authorities);
 		userService.saveNewUser(newUser);
 		
-		return ResponseEntity.ok(null);
+		return ResponseEntity
+				.noContent()
+				.build();
 	}
 
 }
