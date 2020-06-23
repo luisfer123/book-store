@@ -51,5 +51,44 @@ public class BookService {
 	public Book createBook(Book book) {
 		return bookRepo.save(book);
 	}
+	
+	@Transactional
+	public Book updateImageByBookId(byte[] image, long bookId)
+		throws ResourceNotFoundException {
+		
+		if(image.length < 1)
+			throw new RuntimeException("Image is not valid!");
+		
+		Book book = bookRepo.findById(bookId)
+				.orElseThrow(() -> new ResourceNotFoundException());
+		
+		book.setPicture(image);
+		
+		return bookRepo.save(book);
+		
+	}
+	
+	@Transactional
+	public Book updateBookInfo(Long bookId, Book updatedBook)
+			throws ResourceNotFoundException {
+		
+		Book book = bookRepo.findById(bookId).orElseThrow(() ->
+			new ResourceNotFoundException()
+		);
+		
+		book.setName(updatedBook.getName());
+		book.setAuthor(updatedBook.getAuthor());
+		book.setPrice(updatedBook.getPrice());
+		
+		return bookRepo.save(book);
+	}
+
+	@Transactional(readOnly = true)
+	public Book findById(Long id) throws ResourceNotFoundException {
+		return bookRepo
+				.findById(id)
+				.orElseThrow(
+						() -> new ResourceNotFoundException());
+	}
 
 }

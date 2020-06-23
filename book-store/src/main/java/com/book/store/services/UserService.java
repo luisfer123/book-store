@@ -64,7 +64,7 @@ public class UserService implements IUserService {
 	
 	@Override
 	@Transactional
-	public User updateUserData(User user) {
+	public User updateUserData(User user) throws UserNotFoundException {
 		
 		User userUpdated = userRepo.findById(user.getId())
 				.orElseThrow(() -> 
