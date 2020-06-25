@@ -2,14 +2,18 @@ package com.book.store.rest.controllers;
 
 import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Base64;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,29 +39,59 @@ public class BookResource {
 	@Autowired
 	private BookService bookService;
 	
+	@Autowired
+	ResourceLoader resourceLoader;
+	
 	@RequestMapping(path = "")
-	public ResponseEntity<List<Book>> getBooks(
+	public ResponseEntity<Page<Book>> getBooks(
 			@RequestParam(defaultValue = "0") int pageNumber,
 			@RequestParam(defaultValue = "9") int pageSize,
 			@RequestParam(defaultValue = "name") String sortBy) {
 		
-		List<Book> books =
-				bookService.findAllPaginatedAsList(pageNumber, pageSize, sortBy);
+		System.out.println("Query params, page number: " + pageNumber);
 		
-		return ResponseEntity.ok(books);
+		Page<Book> booksPage =
+				bookService.findAllPaginated(pageNumber, pageSize, sortBy);
+		
+		if(pageNumber > booksPage.getTotalPages()) {
+			throw new ResourceNotFoundException();
+		}
+		
+		return ResponseEntity.ok(booksPage);
+	}
+	
+	@GetMapping(path = "/{id}")
+	public ResponseEntity<Book> getBook(
+			@PathVariable("id") Long bookId) {
+		
+		Book book = bookService.findById(bookId);
+		System.out.println("book id: " + bookId);
+		
+		return ResponseEntity.ok(book);
 	}
 	
 	@GetMapping(path="/{id}/imageBook")
 	public ResponseEntity<Map<String, String>> getBookImageById(
-			@PathVariable("id") Long id) {
+			@PathVariable("id") Long id) throws IOException {
 		
 		Book book = bookService.findById(id);
-		System.out.println("book: " + book.getId());
+		Map<String, String> imageResponse = new HashMap<String, String>();
+		byte[] image;
+		
+		if(book.getPicture() == null || book.getPicture().length <= 0) {
+			
+			Resource imageResource = resourceLoader.getResource("classpath:static/images/bookImage.png");			
+			image = Files.readAllBytes(Paths.get(imageResource.getURI()));
+			
+		} else {
+			image = book.getPicture();
+			
+		}
+		
 		String bookImage = Base64
 				.getEncoder()
-				.encodeToString(book.getPicture());
+				.encodeToString(image);
 		
-		Map<String, String> imageResponse = new HashMap<String, String>();
 		imageResponse.put("value", bookImage);
 				
 		return ResponseEntity
