@@ -9,6 +9,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +25,9 @@ public class UserService implements IUserService {
 	
 	@Autowired
 	private UserRepository userRepo;
+	
+	@Autowired
+	private PasswordEncoder encoder;
 	
 	@Override
 	@PreAuthorize(value = "hasRole('ROLE_ADMIN')")
@@ -78,8 +82,14 @@ public class UserService implements IUserService {
 	
 	@Override
 	@Transactional
-	public void updatePassword(String newPassword) {
+	public void updatePassword(Long userId, String newPassword) 
+			throws UserNotFoundException {
 		
+		if(!userRepo.existsById(userId))
+			throw new UserNotFoundException("An User with the id: " + userId + " was not found!");
+		
+		newPassword = encoder.encode(newPassword);
+		userRepo.updatePasswordById(newPassword, userId);
 	}
 	
 	@Override

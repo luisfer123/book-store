@@ -1,13 +1,16 @@
 package com.book.store.model.entities;
 
 import java.math.BigDecimal;
+import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -38,6 +41,15 @@ public class Book {
 	@Lob
 	@Column(name = "picture")
 	private byte[] picture;
+	
+	@OneToMany(mappedBy = "book")
+	private Set<BookItem> bookItems;
+	
+	@OneToMany(
+			mappedBy = "book",
+			cascade = CascadeType.ALL,
+			orphanRemoval = true)
+	private Set<OrderBook> orders;
 
 	public Long getId() {
 		return id;
@@ -78,7 +90,23 @@ public class Book {
 	public void setPicture(byte[] picture) {
 		this.picture = picture;
 	}
-	
+
+	public Set<BookItem> getBookItems() {
+		return bookItems;
+	}
+
+	public void setBookItems(Set<BookItem> bookItems) {
+		this.bookItems = bookItems;
+	}
+
+	public Set<OrderBook> getOrders() {
+		return orders;
+	}
+
+	public void setOrders(Set<OrderBook> orders) {
+		this.orders = orders;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if(this == o)

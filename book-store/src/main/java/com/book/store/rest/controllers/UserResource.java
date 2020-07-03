@@ -88,9 +88,11 @@ public class UserResource {
 	
 	@PutMapping(path = "/{id}/updatePassword")
 	public ResponseEntity<?> updatePassword(
-			@RequestBody @Valid ConfirmPasswordCommand confirmPassword) {
-		
-		System.out.println("password updated!");
+			@RequestBody @Valid ConfirmPasswordCommand confirmPassword,
+			@PathVariable("id") Long userId) {
+				
+		String newPassword = confirmPassword.getPassword();
+		userService.updatePassword(userId, newPassword);
 		
 		return ResponseEntity
 				.noContent()

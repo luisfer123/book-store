@@ -24,7 +24,7 @@ public interface IUserService {
 	
 	User findById(Long id);
 	
-	void updatePassword(String newPassword);
+	void updatePassword(Long userId, String newPassword);
 
 	User updateUserData(User user);
 

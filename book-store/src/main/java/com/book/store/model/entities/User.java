@@ -2,6 +2,7 @@ package com.book.store.model.entities;
 
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -11,6 +12,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.GenericGenerator;
@@ -45,6 +48,12 @@ public class User {
 			joinColumns = @JoinColumn(name = "users_id"),
 			inverseJoinColumns = @JoinColumn(name = "authorities_id"))
 	private Set<Authority> authorities;
+	
+	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+	private Author author;
+	
+	@OneToMany(mappedBy = "user")
+	private Set<Order> orders;
 	
 	public User() { }
 	
@@ -116,7 +125,7 @@ public class User {
 		if(o == this)
 			return true;
 		
-		if(!(o instanceof User))
+		if(o == null || getClass() != o.getClass())
 			return false;
 		
 		User other = (User) o;

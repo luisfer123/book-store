@@ -2,23 +2,23 @@ package com.book.store.model.entities;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.MapsId;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
-
-import org.hibernate.annotations.GenericGenerator;
 
 @Entity
 @Table(name = "authors")
 public class Author {
 	
 	@Id
-	@Column(name = "users_id")
-	@GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
-	@GenericGenerator(name = "native", strategy = "native")
+	@Column(name = "id")
 	private Long id;
-	
-	
+		
+	@OneToOne
+	@MapsId
+	@JoinColumn(name = "users_id")
+	private User user;
 
 }
